@@ -20,40 +20,25 @@ interface AuthState {
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  const { data: authState, isLoading, error } = useQuery<AuthState | null, Error>({
+  const { data: authState, isLoading } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        if (!user) return null;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
 
-        const { data: session, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
 
-        const response = await fetch('/api/auth/user', {
-          headers: {
-            'Authorization': `Bearer ${session.session?.access_token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(await response.text());
-        }
-
-        return response.json();
-      } catch (error) {
-        console.error('ユーザーデータの取得エラー:', error);
-        throw error;
-      }
+      return {
+        user: session.user,
+        dbUser: userData
+      };
     },
-    staleTime: 5 * 60 * 1000, // 5分間キャッシュを維持
-    gcTime: 30 * 60 * 1000, // 30分間キャッシュを保持
-    retry: (failureCount, error) => {
-      if (error?.message?.includes('認証')) return false; // 認証エラーの場合はリトライしない
-      return failureCount < 3; // その他のエラーは最大3回までリトライ
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 指数バックオフ
+    staleTime: 1000 * 60 * 5, // 5分
+    retry: false
   });
 
   const loginMutation = useMutation({

@@ -28,35 +28,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (sessionError) throw sessionError;
-
         if (session?.user) {
-          // 並列でユーザーデータを取得
-          const [{ data: userData, error: userError }] = await Promise.all([
-            supabase
-              .from('users')
-              .select('*')
-              .eq('id', session.user.id)
-              .single()
-          ]);
-
-          if (userError) throw userError;
-          
           setUser(session.user);
+          // ユーザーデータの取得を最適化
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
           setDbUser(userData);
-        } else {
-          setUser(null);
-          setDbUser(null);
         }
-      } catch (error) {
-        console.error('認証エラー:', error);
-        setError(error instanceof Error ? error : new Error('認証エラーが発生しました'));
-        setUser(null);
-        setDbUser(null);
       } finally {
         setIsLoading(false);
       }
