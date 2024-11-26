@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Navigation() {
-  const { user, logout } = useAuth();
+  const { user, dbUser, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -24,7 +24,7 @@ export default function Navigation() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <span className="text-sm text-white">{user.name}</span>
+            <span className="text-sm text-white">{dbUser?.name}</span>
             <Link href="/dashboard">
               <Button variant="outline">管理画面</Button>
             </Link>

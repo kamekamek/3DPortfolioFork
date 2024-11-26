@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { User } from "@db/schema";
+import type { User as DBUser } from "@db/schema";
+import type { User as AuthUser } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 interface LoginCredentials {
@@ -11,10 +12,15 @@ interface RegisterCredentials extends LoginCredentials {
   name: string;
 }
 
+interface AuthState {
+  user: AuthUser | null;
+  dbUser: DBUser | null;
+}
+
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading, error } = useQuery<User | null, Error>({
+  const { data: authState, isLoading, error } = useQuery<AuthState | null, Error>({
     queryKey: ['user'],
     queryFn: async () => {
       try {
@@ -42,7 +48,7 @@ export function useAuth() {
       }
     },
     staleTime: 5 * 60 * 1000, // 5分間キャッシュを維持
-    cacheTime: 30 * 60 * 1000, // 30分間キャッシュを保持
+    gcTime: 30 * 60 * 1000, // 30分間キャッシュを保持
     retry: (failureCount, error) => {
       if (error?.message?.includes('認証')) return false; // 認証エラーの場合はリトライしない
       return failureCount < 3; // その他のエラーは最大3回までリトライ
@@ -108,7 +114,8 @@ export function useAuth() {
   });
 
   return {
-    user,
+    user: authState?.user ?? null,
+    dbUser: authState?.dbUser ?? null,
     isLoading,
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
