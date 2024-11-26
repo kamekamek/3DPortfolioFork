@@ -1,17 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import { db } from "../db";
+import { users } from "@db/schema";
+import { eq } from "drizzle-orm";
+import type { User } from "@db/schema";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase credentials are missing');
+  throw new Error('Required environment variables SUPABASE_URL and SUPABASE_ANON_KEY must be set');
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-import { db } from "../db";
-import { users } from "@db/schema";
-import { eq } from "drizzle-orm";
-import type { User } from "@db/schema";
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function createUser(name: string, email: string, password: string): Promise<User> {
   const { data: authData, error: authError } = await supabase.auth.signUp({

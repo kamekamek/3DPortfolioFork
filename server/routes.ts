@@ -3,7 +3,7 @@ import { db } from "../db";
 import { projects, reviews, loginSchema, registerSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { createUser, findUserByEmail, verifyToken } from "./auth";
-import { supabase } from "../client/src/lib/supabase";
+import { supabase } from "./auth";
 
 interface AuthRequest extends Request {
   user?: any;
@@ -123,6 +123,10 @@ export function setupRoutes(app: Express) {
       res.status(500).json({ error: "Failed to update project transform" });
     }
   });
+
+  // 認証が必要なAPIルートに認証ミドルウェアを追加
+  app.use("/api/projects", authenticateToken);
+  app.use("/api/reviews", authenticateToken);
 
   // Create new project
   app.post("/api/projects", async (req, res) => {
