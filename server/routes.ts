@@ -142,12 +142,17 @@ export function setupRoutes(app: Express) {
   });
 
   // Create new project
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const result = await db.insert(projects).values(req.body).returning();
+      const projectData = {
+        ...req.body,
+        user_id: req.user.id
+      };
+      const result = await db.insert(projects).values(projectData).returning();
       res.status(201).json(result[0]);
     } catch (error) {
-      res.status(500).json({ error: "Failed to create project" });
+      console.error("Failed to create project:", error);
+      res.status(500).json({ error: "プロジェクトの作成に失敗しました" });
     }
   });
 
