@@ -52,27 +52,33 @@ export default function AuthPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
+              <div className="space-y-2">
+                <Input
+                  placeholder="名前"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+            <div className="space-y-2">
               <Input
-                placeholder="名前"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                type="email"
+                placeholder="メールアドレス"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-            )}
-            <Input
-              type="email"
-              placeholder="メールアドレス"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="パスワード"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="パスワード"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
             <Button type="submit" className="w-full">
               {isLogin ? 'ログイン' : '登録'}
             </Button>
