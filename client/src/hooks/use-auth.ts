@@ -14,37 +14,66 @@ interface RegisterCredentials extends LoginCredentials {
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading } = useQuery<User | null>({
+  const { data: user, isLoading, error } = useQuery<User | null, Error>({
     queryKey: ['user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user) return null;
 
-      const response = await fetch('/api/auth/user', {
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        const { data: session, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+
+        const response = await fetch('/api/auth/user', {
+          headers: {
+            'Authorization': `Bearer ${session.session?.access_token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.text());
         }
-      });
 
-      if (!response.ok) return null;
-      return response.json();
+        return response.json();
+      } catch (error) {
+        console.error('ユーザーデータの取得エラー:', error);
+        throw error;
+      }
     },
-    staleTime: Infinity,
-    retry: false
+    staleTime: 5 * 60 * 1000, // 5分間キャッシュを維持
+    cacheTime: 30 * 60 * 1000, // 30分間キャッシュを保持
+    retry: (failureCount, error) => {
+      if (error?.message?.includes('認証')) return false; // 認証エラーの場合はリトライしない
+      return failureCount < 3; // その他のエラーは最大3回までリトライ
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 指数バックオフ
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credentials.email,
+          password: credentials.password,
+        });
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error('ログインエラー:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError: (error) => {
+      console.error('ログイン処理中にエラーが発生しました:', error);
+    },
+    retry: (failureCount, error) => {
+      if (error?.message?.includes('認証')) return false;
+      return failureCount < 2;
     },
   });
 
