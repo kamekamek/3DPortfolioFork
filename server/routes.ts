@@ -2,14 +2,14 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { projects, reviews, loginSchema, registerSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { createUser, findUserByEmail, verifyToken } from "./auth";
+import { signUp, signIn, getCurrentUser } from "./auth";
 import { supabase } from "./auth";
 
 interface AuthRequest extends Request {
   user?: any;
 }
 
-// 認証ミドルウェア
+// Supabase認証ミドルウェア
 async function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -18,13 +18,18 @@ async function authenticateToken(req: AuthRequest, res: Response, next: NextFunc
     return res.status(401).json({ message: "認証が必要です" });
   }
 
-  const user = await verifyToken(token);
-  if (!user) {
-    return res.status(403).json({ message: "無効なトークンです" });
-  }
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (error || !user) {
+      return res.status(403).json({ message: "無効なトークンです" });
+    }
 
-  req.user = user;
-  next();
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: "認証エラーが発生しました" });
+  }
 }
 
 export function setupRoutes(app: Express) {
@@ -33,16 +38,19 @@ export function setupRoutes(app: Express) {
     try {
       const { name, email, password } = registerSchema.parse(req.body);
       
-      const existingUser = await findUserByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({ message: "このメールアドレスは既に登録されています" });
+      const user = await signUp(email, password, name);
+      if (!user) {
+        return res.status(400).json({ message: "ユーザー登録に失敗しました" });
       }
 
-      const user = await createUser(name, email, password);
-      const { data: authData } = await supabase.auth.getSession();
+      const { data: { session }, error: signInError } = await signIn(email, password);
+      if (signInError || !session) {
+        return res.status(400).json({ message: "ログインに失敗しました" });
+      }
+
       res.status(201).json({ 
         user, 
-        token: authData?.session?.access_token 
+        token: session.access_token 
       });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -53,29 +61,26 @@ export function setupRoutes(app: Express) {
     try {
       const { email, password } = loginSchema.parse(req.body);
       
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (authError) {
+      const { data: { session }, error: signInError } = await signIn(email, password);
+      if (signInError || !session) {
         return res.status(401).json({ message: "メールアドレスまたはパスワードが正しくありません" });
       }
 
-      const user = await findUserByEmail(email);
+      const user = await getCurrentUser();
       if (!user) {
         return res.status(401).json({ message: "ユーザーが見つかりません" });
       }
 
       res.json({ 
         user,
-        token: authData.session?.access_token 
+        token: session.access_token 
       });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   });
-  // Get all projects
+
+  // プロジェクト一覧の取得（公開）
   app.get("/api/projects", async (req, res) => {
     try {
       const allProjects = await db.select().from(projects);
@@ -125,8 +130,16 @@ export function setupRoutes(app: Express) {
   });
 
   // 認証が必要なAPIルートに認証ミドルウェアを追加
-  app.use("/api/projects", authenticateToken);
-  app.use("/api/reviews", authenticateToken);
+  const protectedRoutes = [
+    "/api/projects/create",
+    "/api/projects/update",
+    "/api/projects/delete",
+    "/api/reviews"
+  ];
+  
+  protectedRoutes.forEach(route => {
+    app.use(route, authenticateToken);
+  });
 
   // Create new project
   app.post("/api/projects", async (req, res) => {
