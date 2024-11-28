@@ -1,0 +1,94 @@
+name: 3DPortfolioShowcase
+type: project
+description: 3Dポートフォリオショーケース
+
+structure:
+  client:
+    description: フロントエンドアプリケーション
+    contents:
+      src:
+        components:
+          files:
+            - DialogContainer.tsx
+            - Navigation.tsx
+            - ProjectDialog.tsx
+            - ProjectForm.tsx
+            - ReviewForm.tsx
+            - ReviewList.tsx
+          auth:
+            files:
+              - LoginForm.tsx
+              - RegisterForm.tsx
+          scene:
+            files:
+              - ProjectCard.tsx
+              - Scene.tsx
+          ui:
+            description: UIコンポーネント群
+        lib:
+          hooks:
+            files:
+              - useProject.ts
+              - useProjects.ts
+              - useReviews.ts
+              - useUploadImage.ts
+          auth:
+            files:
+              - auth.ts
+          files:
+            - queryClient.ts
+            - store.ts
+            - supabase.ts
+            - types.ts
+            - utils.ts
+        pages:
+          files:
+            - Home.tsx
+            - auth.tsx
+            - dashboard.tsx
+        files:
+          - index.css
+          - main.tsx
+      files:
+        - index.html
+  db:
+    files:
+      - index.ts
+      - policies.sql
+      - schema.sql
+      - schema.ts
+  migrations:
+    description: データベースマイグレーションファイル
+  scripts:
+    files:
+      - insert-sample-projects.ts
+  server:
+    files:
+      - auth.ts
+      - index.ts
+      - routes.ts
+      - vite.ts
+  root_files:
+    - .env
+    - .gitignore
+    - drizzle.config.ts
+    - package.json
+    - postcss.config.js
+    - tailwind.config.ts
+    - tsconfig.json
+    - vite.config.ts
+
+features:
+  - 3Dシーンでのプロジェクト表示
+  - プロジェクトの追加・編集
+  - プロジェクトへのレビュー機能
+  - ユーザー認証
+  - 画像アップロード機能
+
+tech_stack:
+  - React
+  - TypeScript
+  - Three.js
+  - Supabase
+  - Tailwind CSS
+  - Vite

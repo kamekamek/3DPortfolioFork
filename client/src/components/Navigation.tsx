@@ -1,17 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Github, LogOut } from "lucide-react";
-import { Link } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { Button } from "./ui/button";
+import { Github } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Navigation() {
-  const { user, dbUser, logout } = useAuth();
+  const { logout, session } = useAuth();
+  const [_, navigate] = useLocation();
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('ログアウトに失敗しました:', error);
-    }
+    await logout();
+    navigate("/auth");
   };
 
   return (
@@ -21,25 +19,20 @@ export default function Navigation() {
           3D Portfolio
         </h1>
       </Link>
-      <div className="flex items-center gap-4">
-        {user ? (
+      <div className="flex gap-4">
+        {session && (
           <>
-            <span className="text-sm text-white">{dbUser?.name}</span>
             <Link href="/dashboard">
               <Button variant="outline">管理画面</Button>
             </Link>
-            <Button variant="outline" size="icon">
-              <Github className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
+            <Button variant="outline" onClick={handleLogout}>
+              ログアウト
             </Button>
           </>
-        ) : (
-          <Link href="/auth">
-            <Button>ログイン / 新規登録</Button>
-          </Link>
         )}
+        <Button variant="outline" size="icon">
+          <Github className="h-4 w-4" />
+        </Button>
       </div>
     </nav>
   );

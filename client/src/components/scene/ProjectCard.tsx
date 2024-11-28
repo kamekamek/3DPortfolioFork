@@ -37,10 +37,10 @@ export default function ProjectCard({ project, position, rotation }: ProjectCard
     const handleContextLost = () => {
       console.warn('WebGL context lost, attempting to restore...');
     };
-    
+
     const canvas = document.querySelector('canvas');
     canvas?.addEventListener('webglcontextlost', handleContextLost);
-    
+
     return () => {
       canvas?.removeEventListener('webglcontextlost', handleContextLost);
     };

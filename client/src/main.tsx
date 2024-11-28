@@ -1,35 +1,50 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AuthProvider, useAuthContext } from "./contexts/AuthContext";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
-import { Toaster } from "@/components/ui/toaster";
-import { Loader2 } from "lucide-react";
+import { Toaster } from "./components/ui/toaster";
+import { useAuth } from "./hooks/useAuth";
 import Home from "./pages/Home";
 import Dashboard from "./pages/dashboard";
-import AuthPage from "./pages/AuthPage";
+import AuthPage from "./pages/auth";
 
-function Router() {
-  const { user, isLoading } = useAuthContext();
+// 認証が必要なルートを保護するためのコンポーネント
+function PrivateRoute({ component: Component }: { component: React.ComponentType }) {
+  const { session, loading } = useAuth();
+  const [, navigate] = useLocation();
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-border" />
-      </div>
-    );
+  // 認証状態の読み込み中は何も表示しない
+  if (loading) {
+    return null;
   }
 
-  if (!user) {
-    return <AuthPage />;
+  // 未認証の場合は認証ページにリダイレクト
+  if (!session) {
+    navigate("/auth");
+    return null;
+  }
+
+  return <Component />;
+}
+
+function Router() {
+  const { session, loading } = useAuth();
+  const [, navigate] = useLocation();
+
+  // 初回読み込み時に認証状態をチェックし、未認証の場合は/authにリダイレクト
+  if (!loading && !session) {
+    navigate("/auth");
   }
 
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/auth" component={AuthPage} />
+      <Route path="/dashboard">
+        <PrivateRoute component={Dashboard} />
+      </Route>
       <Route>404 Page Not Found</Route>
     </Switch>
   );
@@ -38,10 +53,8 @@ function Router() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        <Toaster />
-      </AuthProvider>
+      <Router />
+      <Toaster />
     </QueryClientProvider>
   </StrictMode>,
 );

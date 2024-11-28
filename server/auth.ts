@@ -1,97 +1,68 @@
 import { createClient } from '@supabase/supabase-js';
-import { db } from "../db";
-import { users } from "@db/schema";
-import { eq } from "drizzle-orm";
 import type { User } from "@db/schema";
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Supabaseクライアントの初期化
-// Supabaseクライアントの作成
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// .envファイルを読み込む（絶対パスで指定）
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase credentials are missing');
 }
 
-export const supabase = createClient(
-  `https://${supabaseUrl}`,
-  supabaseAnonKey,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  }
-);
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// サインアップ機能
-export async function signUp(email: string, password: string, name: string): Promise<User | null> {
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+export async function createUser(name: string, email: string, password: string): Promise<User> {
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      data: {
-        name
-      }
-    }
   });
 
-  if (signUpError) throw signUpError;
-  if (!authData.user) return null;
+  if (authError) throw authError;
 
-  // ユーザー情報をローカルDBに保存
-  const [user] = await db
-    .insert(users)
-    .values({
-      id: authData.user.id,
-      email: authData.user.email!,
-      name
+  const { data: user, error } = await supabase
+    .from('users')
+    .insert({ 
+      id: authData.user?.id,
+      name,
+      email 
     })
-    .returning();
+    .select()
+    .single();
 
+  if (error) throw error;
   return user;
 }
 
-// サインイン機能
-export async function signIn(email: string, password: string) {
-  return await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-}
-
-// サインアウト機能
-export async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-}
-
-// セッション取得
-export async function getSession() {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  return session;
-}
-
-// ユーザー情報の取得
-export async function getCurrentUser(): Promise<User | null> {
-  const { data: { user: authUser }, error } = await supabase.auth.getUser();
-  
-  if (error || !authUser) return null;
-
-  const [user] = await db
+export async function findUserByEmail(email: string): Promise<User | null> {
+  const { data: user, error } = await supabase
+    .from('users')
     .select()
-    .from(users)
-    .where(eq(users.id, authUser.id))
-    .limit(1);
-    
-  return user || null;
+    .eq('email', email)
+    .single();
+
+  if (error) return null;
+  return user;
 }
 
-// セッションの変更を監視
-export function onAuthStateChange(callback: (event: 'SIGNED_IN' | 'SIGNED_OUT', session: any) => void) {
-  return supabase.auth.onAuthStateChange((event, session) => {
-    callback(event as 'SIGNED_IN' | 'SIGNED_OUT', session);
-  });
+export async function verifyToken(token: string): Promise<User | null> {
+  const { data: { user: authUser } } = await supabase.auth.getUser(token);
+
+  if (!authUser) return null;
+
+  const { data: user, error } = await supabase
+    .from('users')
+    .select()
+    .eq('id', authUser.id)
+    .single();
+
+  if (error) return null;
+  return user;
 }

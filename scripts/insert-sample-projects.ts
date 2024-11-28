@@ -10,7 +10,6 @@ const sampleProjects = [
     link: "https://github.com/example/ecommerce",
     position: JSON.stringify([0, 0, -3]),
     rotation: JSON.stringify([0, 0, 0]),
-    user_id: null, // This will be set when a user creates a project
   },
   {
     title: "AI Chat Application",

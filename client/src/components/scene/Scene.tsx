@@ -63,7 +63,7 @@ export default function Scene() {
         maxPolarAngle={Math.PI / 2}
         rotateSpeed={0.8}
       />
-      
+
       <fog attach="fog" args={["#202020", 5, 25]} />
       <ambientLight intensity={0.3} />
       <directionalLight 
