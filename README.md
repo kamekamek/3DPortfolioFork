@@ -1,6 +1,27 @@
-# 3D Portfolio Showcase
+# 3D Portfolio Showcase - 3D空間ポートフォリオ
 
-A 3D space portfolio showcase website built with React, Three.js, and TypeScript. Display your projects in an interactive 3D environment with authentication and real-time updates.
+[English](README_en.md) | 日本語
+
+3D空間を活用したポートフォリオショーケースサイトです。React、Three.js、TypeScriptを使用して構築され、インタラクティブな3D環境でプロジェクトを展示できます。認証機能とリアルタイム更新機能を備えています。
+
+## 概要
+
+このプロジェクトは、以下の特徴を持つ革新的なポートフォリオプラットフォームです：
+
+- 3D空間でのプロジェクト展示
+- インタラクティブな操作性
+- モダンな技術スタックの活用
+- セキュアな認証システム
+
+## 機能
+
+- 🎨 インタラクティブな3D空間でのプロジェクト展示
+- 🔐 Supabaseを使用した安全な認証システム
+- 📱 Tailwind CSSによるレスポンシブデザイン
+- 🎯 TypeScriptによる型安全性の確保
+- 🗄️ PostgreSQLデータベースとDrizzle ORMの活用
+- 🔄 リアルタイム更新機能
+- ⭐ プロジェクト評価とレビューシステム
 
 ## Features
 
@@ -12,7 +33,7 @@ A 3D space portfolio showcase website built with React, Three.js, and TypeScript
 - 🔄 Real-time updates
 - ⭐ Project rating and review system
 
-## Tech Stack
+## 技術スタック | Tech Stack
 
 - **Frontend:**
   - React
@@ -28,72 +49,129 @@ A 3D space portfolio showcase website built with React, Three.js, and TypeScript
   - Drizzle ORM
   - Supabase Auth
 
-## Prerequisites
+## 必要条件 | Prerequisites
 
-Before you begin, ensure you have:
-- Node.js (version 18+ or 20+ recommended)
-- PostgreSQL database (automatically configured in Replit)
-- Supabase account for authentication
-- Git (optional for local development)
-- npm or yarn package manager
+開発を始める前に、以下の環境が必要です：
 
-Note: When using Replit, all prerequisites are automatically handled for you.
+### 必須要件
+- Node.js（バージョン18以上または20以上を推奨）
+  ```bash
+  node -v  # バージョン確認
+  ```
+- PostgreSQLデータベース（Replitでは自動設定）
+  - ローカル開発の場合：PostgreSQL 14以上
+- Supabaseアカウント（認証用）
+  - [Supabase](https://supabase.com)でプロジェクトを作成
+- npmまたはyarnパッケージマネージャー
+  ```bash
+  npm -v  # npmのバージョン確認
+  ```
 
-## Development Environment
+### 推奨要件
+- Git（ローカル開発用、任意）
+  ```bash
+  git --version  # Gitのバージョン確認
+  ```
+- VSCode + 推奨拡張機能:
+  - ESLint
+  - Prettier
+  - TypeScript Vue Plugin
+  - Three.js Editor Tools
 
-### Using Replit (Recommended)
+注意：Replitを使用する場合、これらの要件は自動的に設定されます。
 
-1. Fork the project on Replit
-2. The development environment will be automatically set up with:
-   - PostgreSQL database configuration
-   - Node.js and required dependencies
-   - Development server configuration
-3. Add required environment variables in Replit's Secrets tab:
-   - VITE_SUPABASE_URL
-   - VITE_SUPABASE_ANON_KEY
-4. Click the "Run" button to start the development server
-5. Your application will be immediately available with hot-reload enabled
+## 開発環境のセットアップ | Development Environment
 
-### Local Development Setup
+### Replitでの開発（推奨）
 
-1. Clone the repository:
+1. Replitでプロジェクトをフォーク
+   - [Replitプロジェクトページ](https://replit.com/@username/project-name)にアクセス
+   - 「Fork」ボタンをクリック
+
+2. 環境変数の設定
+   - Replitのツールバーから「Secrets」タブを開く
+   - 以下の環境変数を設定：
+     ```
+     VITE_SUPABASE_URL=your_supabase_url
+     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+     ```
+
+3. 開発サーバーの起動
+   - 「Run」ボタンをクリック
+   - 自動的に以下が設定されます：
+     - PostgreSQLデータベースの設定
+     - 必要な依存関係のインストール
+     - 開発サーバーの設定
+
+4. アプリケーションの確認
+   - Replitのプレビューウィンドウで自動的に表示
+   - ホットリロードが有効な状態で開発可能
+
+### ローカル開発環境のセットアップ | Local Development Setup
+
+1. リポジトリのクローン:
 ```bash
 git clone <repository-url>
 cd portfolio-3d
 ```
 
-2. Install dependencies:
+2. 依存関係のインストール:
 ```bash
+# npmの場合
 npm install
+
+# yarnの場合
+yarn install
+
+# グローバルな依存関係のインストール（必要な場合）
+npm install -g typescript ts-node
 ```
 
-3. Set up environment variables by creating a `.env` file:
+3. 環境変数の設定:
+   
+`.env`ファイルをプロジェクトルートに作成:
 ```env
-# Database Configuration
-DATABASE_URL=<your-database-url>
-PGHOST=<database-host>
-PGPORT=<database-port>
-PGUSER=<database-user>
-PGPASSWORD=<database-password>
-PGDATABASE=<database-name>
+# データベース設定
+DATABASE_URL=postgresql://username:password@localhost:5432/portfolio_db
+PGHOST=localhost
+PGPORT=5432
+PGUSER=your_username
+PGPASSWORD=your_password
+PGDATABASE=portfolio_db
 
-# Supabase Configuration (Required for Authentication)
-VITE_SUPABASE_URL=<your-supabase-url>
-VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+# Supabase設定（認証用）
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Server Configuration (Optional)
-NODE_ENV=development # or production
-PORT=3000 # API server port
+# サーバー設定
+NODE_ENV=development  # または production
+PORT=3000  # APIサーバーポート
 ```
 
-4. Initialize the database:
+4. データベースのセットアップ:
 ```bash
+# PostgreSQLサービスが実行中であることを確認
+sudo service postgresql status  # Linuxの場合
+brew services list             # macOSの場合
+
+# データベースの作成
+createdb portfolio_db
+
+# マイグレーションの実行
 npm run db:push
+
+# 初期データの投入（オプション）
+npm run db:seed
 ```
 
-5. Start the development server:
+5. 開発サーバーの起動:
 ```bash
+# フロントエンドとバックエンドを同時に起動
 npm run dev
+
+# 個別に起動する場合
+npm run dev:client  # フロントエンドのみ
+npm run dev:server  # バックエンドのみ
 ```
 
 The application will be available at:
@@ -154,22 +232,60 @@ The application uses the following main tables:
 - `GET /api/projects/:id/reviews` - Get project reviews
 - `POST /api/projects/:id/reviews` - Add a review
 
-## Common Issues & Debugging
+## トラブルシューティング | Troubleshooting
 
-### Database Connection
-- Ensure PostgreSQL is running locally
-- Check DATABASE_URL format
-- Verify database user permissions
+### データベース接続の問題
+- PostgreSQLが実行中か確認:
+  ```bash
+  # Linuxの場合
+  sudo service postgresql status
+  # macOSの場合
+  brew services list | grep postgresql
+  ```
+- DATABASE_URLの形式を確認:
+  ```
+  postgresql://username:password@localhost:5432/database_name
+  ```
+- データベースユーザーの権限確認:
+  ```sql
+  # PostgreSQLコンソールで実行
+  \du  -- ユーザー権限の一覧表示
+  ```
 
-### 3D Scene Performance
-- Enable hardware acceleration in browser
-- Check WebGL compatibility
-- Reduce polygon count for better performance
+### 3D表示の問題
+- ブラウザの設定:
+  - ハードウェアアクセラレーションを有効化
+  - WebGL対応を確認: `chrome://gpu`
+- パフォーマンスの最適化:
+  - ポリゴン数の削減
+  - テクスチャサイズの最適化
+  - モデルの最適化推奨設定:
+    ```javascript
+    // Three.jsの最適化設定例
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    ```
 
-### Authentication Issues
-- Verify Supabase credentials
-- Check browser console for CORS errors
-- Ensure environment variables are set correctly
+### 認証関連の問題
+- Supabase認証情報の確認:
+  1. Supabaseダッシュボードで認証情報を確認
+  2. 環境変数の値が正しいか確認
+- CORS関連のエラー:
+  - ブラウザのコンソールでエラーを確認
+  - バックエンドのCORS設定を確認:
+    ```javascript
+    // server/index.tsでのCORS設定例
+    app.use(cors({
+      origin: process.env.CLIENT_URL,
+      credentials: true
+    }));
+    ```
+- 環境変数のトラブルシューティング:
+  ```bash
+  # 環境変数が正しく設定されているか確認
+  printenv | grep VITE_
+  printenv | grep PG
+  ```
 
 ## License
 
