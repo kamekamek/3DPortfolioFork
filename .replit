@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "postgresql-16"]
+modules = ["nodejs-20", "web", "postgresql-16", "python-3.11"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
@@ -19,6 +19,10 @@ localPort = 5173
 externalPort = 5173
 exposeLocalhost = true
 
+[[ports]]
+localPort = 8000
+externalPort = 8000
+
 [workflows]
 runButton = "Project"
 
@@ -30,6 +34,10 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "3D Portfolio"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Serve README"
 
 [[workflows.workflow]]
 name = "3D Portfolio"
@@ -45,3 +53,18 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Serve README"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 -m http.server 8000"
+waitForPort = 8000
