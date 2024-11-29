@@ -291,20 +291,85 @@ The application uses the following main tables:
 
 MIT License - see LICENSE file for details
 
-## Deployment
+## デプロイメント | Deployment
 
-The recommended deployment platform for this project is Replit:
+本プロジェクトは、Replitでのデプロイを推奨しています：
 
-1. Fork the project on Replit
-2. Set up the required environment variables in Replit Secrets
-3. Use the "Run" button to deploy
-4. Replit will automatically:
-   - Set up the database
-   - Install dependencies
-   - Build and serve the application
-   - Provide a public URL for your portfolio
+### 本番環境へのデプロイ手順
 
-For the best performance, consider upgrading to a paid Replit plan for additional resources and always-on deployment.
+1. Replitでプロジェクトをフォーク:
+   - プロジェクトページから「Fork」ボタンをクリック
+   - 必要に応じてプロジェクト名を変更
+
+2. 環境変数の設定（重要）:
+   - Replitの「Secrets」タブで以下の環境変数を設定:
+     ```
+     # 必須の環境変数
+     VITE_SUPABASE_URL=your_supabase_project_url
+     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+     NODE_ENV=production
+     ```
+
+3. ビルドとデプロイの準備:
+   - 本番環境用のビルドスクリプトが正しく設定されていることを確認
+   - package.jsonの`build`スクリプトで以下が実行されることを確認:
+     ```json
+     {
+       "scripts": {
+         "build": "tsc && vite build",
+         "start": "node dist/server/index.js"
+       }
+     }
+     ```
+
+4. デプロイの実行:
+   - 「Run」ボタンをクリックしてデプロイを開始
+   - Replitが自動的に以下を実行:
+     - データベースのセットアップ
+     - 依存関係のインストール
+     - アプリケーションのビルドと起動
+     - 公開URLの提供
+
+### 環境変数に関する重要な注意点
+
+1. Viteの環境変数の扱い:
+   - `VITE_`プレフィックスを持つ環境変数のみがクライアントサイドで利用可能
+   - ビルド時に環境変数が埋め込まれるため、デプロイ前に正しく設定されていることを確認
+   - セキュリティのため、機密情報は`VITE_`プレフィックスを付けずにサーバーサイドでのみ使用
+
+2. 環境変数の検証:
+   ```bash
+   # ビルド前に環境変数が正しく設定されているか確認
+   printenv | grep VITE_
+   printenv | grep NODE_ENV
+   ```
+
+3. トラブルシューティング:
+   - 環境変数が読み込まれない場合:
+     1. Replitの「Secrets」タブで値が正しく設定されているか確認
+     2. 必要に応じてワークフローを再起動
+     3. `.env`ファイルではなく、Replitの「Secrets」を使用していることを確認
+
+4. パフォーマンスの最適化:
+   - Replitの有料プランへのアップグレードを検討（追加リソースと常時稼働が可能）
+   - キャッシュの活用とアセットの最適化を確認
+
+### デプロイ後の確認事項
+
+1. アプリケーションの動作確認:
+   - 認証機能の確認
+   - 3D表示の確認
+   - データベース接続の確認
+
+2. パフォーマンスモニタリング:
+   - ブラウザの開発者ツールでパフォーマンスを確認
+   - エラーログの監視
+   - レスポンス時間の測定
+
+3. セキュリティ確認:
+   - 環境変数が正しく保護されているか確認
+   - CORS設定の確認
+   - SSL/TLS証明書の確認（Replitが自動的に提供）
 
 ## Contributing
 
