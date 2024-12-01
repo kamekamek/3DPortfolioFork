@@ -70,6 +70,5 @@ args = "python3 -m http.server 8000"
 waitForPort = 8000
 
 [env]
-VITE_SUPABASE_URL = "https://gzxzhxyxhbopnqioyuso.supabase.co
-VITE_SUPABASE_ANON"
+VITE_SUPABASE_URL = "https://gzxzhxyxhbopnqioyuso.supabase.co"
 VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6eHpoeHl4aGJvcG5xaW95dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MzgzMjQsImV4cCI6MjA0ODAxNDMyNH0.HxkirHrLKDeceRyMbj1wgRO9XMGJLAOy4aX9wkT_yf8"
